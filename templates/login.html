@@ -214,10 +214,32 @@
       .user{
         width: 80%;
       }
+              /* Default to hiding both views */
+      #mobileView, #desktopView {
+          display: none;
+      }
+
+      /* Mobile view styles */
+      @media only screen and (max-width: 768px) {
+          #mobileView {
+              display: block;
+              background-color: lightblue;
+              padding: 10px;
+          }
+      }
+
+      /* Desktop view styles */
+      @media only screen and (min-width: 769px) {
+          #desktopView {
+              display: block;
+              background-color: lightgreen;
+              padding: 10px;
+          }
+      }
     </style>
   </head>
   <body>
-    <div class="login">
+    <div class="login" id="mobileView">
       <div class="elizade-university-1">
         <img class="bg" src="{% static 'elizade_university_1.jpeg' %}" alt="Elizade University">
       </div>
@@ -233,6 +255,9 @@
           <input class="button" type="submit" value="Submit">
         </form>
       </div>
+    </div>
+    <div id="desktopView">
+      <p>Mobile View not available </p>
     </div>
     <footer>
       <div class="navigation">

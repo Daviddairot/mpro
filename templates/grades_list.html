@@ -1,0 +1,57 @@
+<!-- templates/grades_list.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Grade List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Student</th>
+                <th>Matric Number</th>
+                <th>Score</th>
+                <th>CA</th>
+                <th>Extra</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grade in grades %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ grade.student.first_name }} {{ grade.student.last_name }}</td>
+                <td>{{ grade.student.matric_number }}</td>
+                <td>{{ grade.score }}</td>
+                <td>{{ grade.ca }}</td>
+                <td>{{ grade.extra }}</td>
+                <td>{{ grade.total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <form action="{% url 'download_grades' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Download as Word Document</button>
+    </form>
+</body>
+</html>

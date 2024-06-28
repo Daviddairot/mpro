@@ -1,0 +1,277 @@
+.search-deets .elizade-university {
+  margin-left: 20%;
+  margin-bottom: 12px;
+  display: inline-block;
+  align-self: flex-start;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.4px;
+  line-height: 1;
+  color: #FFFEFE;
+}
+.search-deets .gst-210-music-practical-assessment {
+  margin-left: 20%;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.3px;
+  line-height: 1;
+  color: #FFFEFE;
+}
+.search-deets .container-1 {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+}
+.search-deets .unnamed-1 {
+  position: absolute;
+  left: 0px;
+  top: -4px;
+  width: 173px;
+  height: 147px;
+}
+.un{
+  position: absolute;
+  width: 90%;
+  height: 24.15vh;
+  margin-left: 32%;
+}
+.search-deets .navigation {
+  border-bottom: 10px solid #FFD700;
+  background: #092A49;
+  position: relative;
+  margin: -8px 11px 25px 14px;
+  display: flex;
+  padding: 33px 286.6px 30px 0;
+  width: 110%;
+  box-sizing: border-box;
+}
+.search-deets .elizade-university-1 {
+  filter: blur(7.5px);
+  width: 1305px;
+  height: 698px;
+}
+.bg{
+  width: 110%;
+  height: 100vh;
+}
+.search-deets .container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 1305px;
+  height: fit-content;
+  box-sizing: border-box;
+}
+.search-deets .rectangle-7 {
+  opacity: 0.45;
+  mix-blend-mode: screen;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  border-radius: 25px;
+  background: #FFFEFE;
+  position: absolute;
+  top: 35vh;
+  right: 251px;
+  bottom: 32px;
+  width: 746px;
+  height: 568px;
+}
+.search-deets .matric-number {
+  position: absolute;
+  left: 374px;
+  top: 324px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+.search-deets .eu-1903061993 {
+  position: absolute;
+  left: 555px;
+  top: 324px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+.search-deets .instrument {
+  position: absolute;
+  top: 324px;
+  right: 421.9px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+.search-deets .guitar {
+  position: absolute;
+  top: 324px;
+  right: 343.2px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+.search-deets .assessment-for-dairo-temitope {
+  position: absolute;
+  left: 50%;
+  top: 267px;
+  translate: -50% 0;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000;
+}
+.search-deets .matric-no-input {
+  opacity: 0.6;
+  mix-blend-mode: screen;
+  border-radius: 8px;
+  background: #FFFFFF;
+  position: absolute;
+  right: 471px;
+  bottom: 389px;
+  width: 211px;
+  height: 48px;
+}
+.search-deets .matric-no-input-1 {
+  opacity: 0.6;
+  mix-blend-mode: screen;
+  border-radius: 8px;
+  background: #FFFFFF;
+  position: absolute;
+  right: 471px;
+  bottom: 318px;
+  width: 211px;
+  height: 48px;
+}
+.search-deets .matric-no-input-2 {
+  opacity: 0.6;
+  mix-blend-mode: screen;
+  border-radius: 8px;
+  background: #FFFFFF;
+  position: absolute;
+  right: 471px;
+  bottom: 255px;
+  width: 211px;
+  height: 48px;
+}
+.search-deets .matric-no-input-3 {
+  opacity: 0.6;
+  mix-blend-mode: screen;
+  border-radius: 8px;
+  background: #FFFFFF;
+  position: absolute;
+  right: 471px;
+  bottom: 188px;
+  width: 211px;
+  height: 48px;
+}
+.search-deets .song-1 {
+  position: absolute;
+  left: 468px;
+  bottom: 397px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+.search-deets .song-2 {
+  position: absolute;
+  left: 468px;
+  bottom: 326px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+.search-deets .song-3 {
+  position: absolute;
+  left: 468px;
+  bottom: 264px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+.search-deets .dressing {
+  position: absolute;
+  left: 468px;
+  bottom: 197px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+.search-deets .submit {
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000;
+}
+.search-deets .searchbutton {
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  background: #092A49;
+  position: absolute;
+  left: 50%;
+  bottom: 103px;
+  translate: -50% 0;
+  display: flex;
+  padding: 13.5px 0 13.5px 1px;
+  width: 126px;
+  box-sizing: border-box;
+}
+.search-deets {
+  background: #FFFFFF;
+  display: flex;
+  width: 1280px;
+  box-sizing: border-box;
+}
+input{
+  position: absolute;
+  left: 300px;
+  overflow-wrap: break-word;
+  font-family: 'Karla';
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 1.3;
+  color: #000000;
+}
+button{
+  width: 90%;
+  height: 7vh;
+  position: absolute;
+  left: 12%;
+  border-radius: 10px;
+  background-color: #000000;
+  color: #FFFEFE;
+}
+.h3{
+  margin-top: 22vh;
+}

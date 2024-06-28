@@ -1,0 +1,18 @@
+<!-- musicapp/templates/musicapp/assessment_list.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Assessments</title>
+</head>
+<body>
+    <h2>Your Assessments</h2>
+    <ul>
+        {% for assessment in assessments %}
+            <li>{{ assessment.student }}: Song1: {{ assessment.song1 }}, Song2: {{ assessment.song2 }}, Song3: {{ assessment.song3 }}, Dressing: {{ assessment.dressing }}</li>
+        {% empty %}
+            <li>No assessments found for this student.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!-- musicapp/templates/musicapp/assess_student.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assess Student</title>
+</head>
+<body>
+    <h2>Assess {{ student.first_name }} {{ student.last_name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Assessment</button>
+    </form>
+</body>
+</html>

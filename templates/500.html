@@ -1,0 +1,37 @@
+<!-- templates/404.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 20px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 20px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>500</h1>
+    <p>Oops! Do not go back or reload it as been saved</p>
+    <p><a href="{% url 'search_student'%}">Return to Search</a></p>
+</body>
+</html>

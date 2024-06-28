@@ -1,0 +1,228 @@
+{%load static%}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SearchResult</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'search_resut.css' %}" />
+    <style>
+      :root{
+        overflow-x: hidden;
+      }
+      .search-resut .elizade-university {
+        margin-left: 20%;
+        margin-bottom: 12px;
+        display: inline-block;
+        align-self: flex-start;
+        overflow-wrap: break-word;
+        font-family: 'Karla';
+        font-weight: 500;
+        font-size: 36px;
+        letter-spacing: -0.4px;
+        line-height: 1;
+        color: #FFFFFF;
+      }
+      .search-resut .gst-210-music-practical-assessment {
+        margin-left: 20%;
+        overflow-wrap: break-word;
+        font-family: 'Karla';
+        font-weight: 400;
+        font-size: 30px;
+        letter-spacing: -0.3px;
+        line-height: 1;
+        color: #FFFFFF;
+      }
+      .search-resut .container-1 {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        width: 100%;
+      }
+      .search-resut .unnamed-1 {
+        position: absolute;
+        left: 0px;
+        top: -4px;
+        width: 173px;
+        height: 147px;
+      }
+      .bg{
+        width: 110%;
+        height: 100vh;
+      }
+      .search-resut .navigation {
+        border-bottom: 10px solid #FFD700;
+        background: #092A49;
+        position: relative;
+        margin: -8px 11px 25px 14px;
+        display: flex;
+        padding: 33px 286.6px 30px 0;
+        width: 110%;
+        box-sizing: border-box;
+      }
+      .search-resut .elizade-university-1 {
+        filter: blur(7.5px);
+        width: 1305px;
+        height: 678px;
+      }
+      .un{
+        position: absolute;
+        width: 90%;
+        height: 24.15vh;
+        margin-left: 32%;
+      }
+      .search-resut .container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 1305px;
+        height: fit-content;
+        box-sizing: border-box;
+      }
+      .search-resut .rectangle-6 {
+        opacity: 0.45;
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        border-radius: 25px;
+        background: #FFFEFE;
+        position: absolute;
+        top: 35vh;
+        right: 251px;
+        bottom: 32px;
+        width: 746px;
+        height: 568px;
+      }
+      .search-resut .name {
+        position: absolute;
+        left: 504px;
+        top: 386px;
+        overflow-wrap: break-word;
+        font-family: 'Karla';
+        font-weight: 500;
+        font-size: 24px;
+        line-height: 1.3;
+        color: #000000;
+      }
+      .search-resut .matric-number {
+        position: absolute;
+        left: 403px;
+        bottom: 338px;
+        overflow-wrap: break-word;
+        font-family: 'Karla';
+        font-weight: 500;
+        font-size: 24px;
+        line-height: 1.3;
+        color: #000000;
+      }
+      .search-resut .instrument {
+        position: absolute;
+        left: 438px;
+        bottom: 252px;
+        overflow-wrap: break-word;
+        font-family: 'Karla';
+        font-weight: 500;
+        font-size: 24px;
+        line-height: 1.3;
+        color: #000000;
+      }
+      .search-resut .search-result-for-1993 {
+        position: absolute;
+        left: 50%;
+        top: 256px;
+        translate: -50% 0;
+        text-align: center;
+        overflow-wrap: break-word;
+        font-family: 'Karla';
+        font-weight: 800;
+        font-size: 36px;
+        line-height: 1.3;
+        color: #FFFFFF;
+      }
+      .search-resut .grade {
+        overflow-wrap: break-word;
+        font-family: 'Karla';
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1.3;
+        color: #FFFFFF;
+      }
+      .search-resut .searchbutton {
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        border-radius: 4px;
+        background: #092A49;
+        position: absolute;
+        left: 50%;
+        bottom: 122px;
+        translate: -50% 0;
+        display: flex;
+        padding: 13.5px 0;
+        width: 126px;
+        box-sizing: border-box;
+      }
+      .search-resut {
+        background: #FFFFFF;
+        display: flex;
+        width: 1280px;
+        box-sizing: border-box;
+      }
+      .e{
+        z-index: 10;
+        margin: 60vh;
+        color: #000000;
+        width: 100%;
+        position: absolute;
+        font-size: larger;
+      }
+      .p{
+        z-index: 10;
+        margin: 45vh;
+        left: 20%;
+        color: #000000;
+        width: 100%;
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="search-resut">
+      <div class="container">
+        <div class="navigation">
+          <div class="container-1">
+            <div class="elizade-university">
+            ELIZADE UNIVERSITY
+            </div>
+            <span class="gst-210-music-practical-assessment">
+            GST 210 MUSIC PRACTICAL ASSESSMENT
+            </span>
+          </div>
+          <div class="unnamed-1">
+            <img class="un" src='{% static "unnamed_1.png" %}' alt="logo"/>
+          </div>
+        </div>
+        <div class="elizade-university-1">
+          <img class="bg" src="{% static 'elizade_university_1.jpeg' %}" alt="">
+        </div>
+      </div>
+      <h2 class="p">Search Results for "{{ matric_suffix }}"</h2>
+      <ul class="e">
+          {% for student in students %}
+              <li>
+                  <a href="{% url 'student_assessment_list' student.id %}">
+                      {{ student.first_name }} {{ student.last_name }} | Matric: {{ student.matric_number }} | Instrument: {{ student.instrument }}
+                  </a>
+              </li>
+          {% empty %}
+              <li>No students found.</li>
+          {% endfor %}
+      </ul>
+      <div class="rectangle-6">
+      </div>
+      
+    </div>
+  </body>
+</html>

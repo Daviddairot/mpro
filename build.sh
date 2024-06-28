@@ -11,4 +11,3 @@ python update_ca.py
 
 python manage.py import_students s.docx
 
-python update_extra.py

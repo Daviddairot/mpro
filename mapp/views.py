@@ -1,102 +1,167 @@
 # musicapp/views.py
 from django.http import HttpResponse
+
+from mapp.utils import get_tokens_for_user
 from .models import Grade, Student, Assessment
 from .forms import AssessmentForm
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Student, Assessment
+from .models import Student, Assessment, CA
 from .forms import AssessmentForm, StudentSearchForm
 import logging
 from docx import Document
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+
 
 logger = logging.getLogger(__name__)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = UserCreationForm()
-    return render(request, 'signup.html', {'form': form})
-
-@login_required
-def home(request):
-    return render(request, 'home.html')
-
-def end(request):
-    return render(request, 'end.html')
+    username = request.data.get('username')
+    password = request.data.get('password')
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Username already exists'}, status=400)
+    user = User.objects.create_user(username=username, password=password)
+    tokens = get_tokens_for_user(user)
+    return Response({'message': 'User created successfully', 'tokens': tokens})
 
 
-def search_student(request):
-    if request.method == 'POST':
-        form = StudentSearchForm(request.POST)
-        if form.is_valid():
-            matric_suffix = form.cleaned_data.get('matric_suffix')
-            logger.debug(f"Searching for matric suffix: {matric_suffix}")
-            students = Student.objects.filter(matric_number__icontains=matric_suffix)
-            return render(request, 'search_results.html', {'students': students, 'matric_suffix': matric_suffix})
-        else:
-            logger.debug(f"Form errors: {form.errors}")
-    else:
-        form = StudentSearchForm()
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    username = request.data.get("username")
+    password = request.data.get("password")
 
-    return render(request, 'search_student.html', {'form': form})
+    if not username or not password:
+        return Response({"error": "Username and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = authenticate(username=username, password=password)
+    
+    if not user:
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    tokens = get_tokens_for_user(user)
+
+    students = Student.objects.all()
+    
+    studentData = [
+        {
+            'id': student.id,
+            'firstName': student.first_name or "NULL",
+            'lastName': student.last_name or "NULL",
+            'matricNumber': student.matric_number or "NULL",
+            'instrument': student.instrument or "NULL"
+        }
+        for student in students
+    ]
+    return Response({'message': 'Login successful', 'tokens': tokens, 'students': studentData})
 
 
-@login_required
-def assess_student(request, student_id):
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def ca(request):
+    user = request.user
+    student_id = request.data.get('student')  # Assuming student is passed as an ID
+    CBT = request.data.get('CBT')
+    practical = request.data.get('practical')
+    AH = request.data.get('AH')
+    Assignments = request.data.get('Assignments')
+    print(student_id)
+    # Get Assessor (User)
+    try:
+        assessor = User.objects.get(username=user.username)
+    except User.DoesNotExist:
+        return Response({'error': 'Invalid Assessor'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Get Student
     student = get_object_or_404(Student, id=student_id)
-    if request.method == 'POST':
-        form = AssessmentForm(request.POST)
-        if form.is_valid():
-            assessment = form.save(commit=False)
-            assessment.assessor = request.user
-            assessment.student = student
-            assessment.save()
-            return redirect('student_assessment_list', student_id=student.id)
-    else:
-        form = AssessmentForm(initial={'student': student})
+    print(student)
+    # Get or create CA record
+    ca, created = CA.objects.get_or_create(student=student)
+    print(ca)
+    # Assign assessor
+    ca.assessor = assessor
+    
 
-    return render(request, 'assess_student.html', {'form': form, 'student': student})
+    # Update only if a value is provided
+    if CBT is not None:
+        ca.CBT = CBT
+    if practical is not None:
+        ca.practical = practical
+    if AH is not None:
+        ca.AH = AH
+    if Assignments is not None:
+        ca.Assignment = Assignments  # Make sure field name matches your model
 
-@login_required
-def student_assessment_list(request, student_id):
+    ca.save()
+
+    return Response({'message': 'Success'}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getCA(request, id):
+    user = request.user
+    stud = get_object_or_404(Student, id=id)
+    student, created = CA.objects.get_or_create(student=stud)
+    studentData = [
+        {
+            # 'id': student.id,
+            'firstName': student.student.first_name or "NULL",
+            'lastName': student.student.last_name or "NULL",
+            'matricNumber': student.student.matric_number or "NULL",
+            'instrument': student.student.instrument or "NULL",
+            "CBT": student.CBT,
+            "practical": student.practical,
+            "AH": student.AH,
+            "Assignment": student.Assignment,
+            "total": student.total
+        }
+    ]
+    return Response({'ca':studentData}, status=200)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def exam(request):
+    user = request.user
+    student_id = request.data.get('student')
+    song1 = request.data.get('song1')
+    song2 = request.data.get('song2')
+    song3 = request.data.get('song3')
+    dressing = request.data.get('dressing')
+    
+    # Get student
     student = get_object_or_404(Student, id=student_id)
-    assessments = Assessment.objects.filter(student=student)
-    grade = Grade.objects.filter(student=student).first()
 
-    if request.method == 'POST':
-        form = AssessmentForm(request.POST)
-        if form.is_valid():
-            assessment = form.save(commit=False)
-            assessment.assessor = request.user
-            assessment.student = student
-            assessment.save()
-            return redirect('end')
-    else:
-        form = AssessmentForm()
-
-    return render(request, 'student_assessment_list.html', {
+    # Create assessment
+    examData = {
+        'song1': song1,
+        'song2': song2,
+        'song3': song3,
+        'dressing': dressing,
         'student': student,
-        'assessments': assessments,
-        'form': form,
-        'grade': grade,
-    })
+        'assessor': user,
+    }
 
-@login_required
-def assessment_list(request):
-    assessments = Assessment.objects.filter(assessor=request.user)
-    return render(request, 'assessment_list.html', {'assessments': assessments})
+    assessment = Assessment.objects.create(**examData)
+    
+    return Response({'message': 'success'}, status=201)
+
+
 
 def grades_list(request):
     grades = Grade.objects.all()
-    return render(request, 'grades_list.html', {'grades': grades})
+    return Response({'grades': grades}, status=201)
 
 
 def download_grades(request):
@@ -131,3 +196,48 @@ def download_grades(request):
     response['Content-Disposition'] = 'attachment; filename=grades.docx'
     doc.save(response)
     return response
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def studentData(request):
+    user = request.user
+    assessor =  get_object_or_404(User, username=user)
+    if assessor is None:
+        return Response({'error': 'Invalid Assessor'}, status=status.HTTP_400_BAD_REQUEST)
+    students = Student.objects.all()
+    studentData = [
+        {
+            'id': student.id,
+            'firstName': student.first_name or "NULL",
+            'lastName': student.last_name or "NULL",
+            'matricNumber': student.matric_number or "NULL",
+            'instrument': student.instrument or "NULL"
+        }
+        for student in students
+    ]
+    return Response({'message': 'all registered student', 'students': studentData})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def grade(request):
+    user = request.user
+    assessor =  get_object_or_404(User, username=user)
+    if assessor is None:
+        return Response({'error': 'Invalid Assessor'}, status=status.HTTP_400_BAD_REQUEST)
+    grades = Grade.objects.all()
+    gradeData = [
+        {
+            'id': grade.id,
+            'extra': grade.extra,
+            'firstname': grade.student.first_name,
+            'lastname':grade.student.last_name,
+            'matric_number': grade.student.matric_number,
+            'CA': grade.ca.total,
+            'Exam': grade.score,
+            'total': grade.total
+        }
+        for grade in grades
+    ]
+    return Response({'message': 'all grades', 'grades': gradeData})

@@ -58,12 +58,12 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://mfront-phi.vercel.app",
+    "https://mfront-zeta.vercel.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "https://mfront-phi.vercel.app",
+    "https://mfront-zeta.vercel.app",
 ]
 
 

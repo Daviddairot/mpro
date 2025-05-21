@@ -11,6 +11,7 @@ urlpatterns = [
     path('getca/<int:id>', views.getCA, name='getca'),
     path('student-data', views.studentData, name='studentData'),
     path('exam', views.exam, name='exam'),
+    path('getUser', views.getUser, name='getUser'),
     path('grade', views.grade, name='grades_list'),
     path('grades/', views.grades_list, name='grades_list'),
     path('download-grades/', views.download_grades, name='download_grades'),

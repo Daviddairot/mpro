@@ -128,7 +128,14 @@ def getCA(request, id):
     ]
     return Response({'ca':studentData}, status=200)
 
-
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def getUser(request):
+    print("got here")
+    user = request.user
+    return Response (
+        {'user': user.username}, 
+        status = 201)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

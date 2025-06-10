@@ -37,11 +37,12 @@ class Assessment(models.Model):
 class CA(models.Model):
     student = models.OneToOneField(Student, on_delete=models.CASCADE)
     assessor = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    CBT = models.DecimalField(decimal_places=7, max_digits=7, default=0.00)
-    practical = models.DecimalField(decimal_places=7, max_digits=7, default=0.00)
-    AH = models.DecimalField(decimal_places=7, max_digits=7, default=0.00)
-    Assignment = models.DecimalField(decimal_places=7, max_digits=7, default=0.00)
-    total = models.DecimalField(max_digits=7, decimal_places=7, default=0.00)
+    CBT = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
+    practical = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
+    AH = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
+    Assignment = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
+    total = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+
 
     def save(self, *args, **kwargs):
         self.total = Decimal(self.CBT) + Decimal(self.practical) + Decimal(self.AH) + Decimal(self.Assignment)

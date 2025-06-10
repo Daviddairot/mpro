@@ -64,7 +64,7 @@ CORS_ALLOWED_ORIGINS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "https://music-iota-ashen-56.vercel.app/",
+    "https://music-iota-ashen-56.vercel.app",
     "http://172.20.10.2:3000"
 ]
 

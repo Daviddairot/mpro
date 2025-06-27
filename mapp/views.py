@@ -18,6 +18,9 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.views.decorators.csrf import csrf_exempt 
 
 
 logger = logging.getLogger(__name__)
@@ -248,3 +251,188 @@ def grade(request):
         for grade in grades
     ]
     return Response({'message': 'all grades', 'grades': gradeData})
+
+
+@api_view(['POST'])
+@csrf_exempt
+@permission_classes([AllowAny])
+@parser_classes([MultiPartParser, FormParser])
+def import_students_from_docx(request):
+    uploaded_file = request.FILES.get('file')
+
+    if not uploaded_file:
+        return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        document = Document(uploaded_file)
+        table = document.tables[0]
+        created_count = 0
+        updated_count = 0
+
+        for row in table.rows[1:]:  # Skip header
+            matric_number = row.cells[0].text.strip()
+            full_name = row.cells[1].text.strip()
+            instrument = row.cells[2].text.strip()
+
+            surname, first_name = parse_name(full_name)
+
+            student, created = Student.objects.update_or_create(
+                matric_number=matric_number,
+                defaults={
+                    'first_name': first_name,
+                    'last_name': surname,
+                    'instrument': instrument
+                }
+            )
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+
+        return Response({
+            "message": "Import completed successfully.",
+            "created": created_count,
+            "updated": updated_count
+        })
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+def parse_name(full_name):
+    parts = full_name.split(", ")
+    return (parts[0], parts[1]) if len(parts) == 2 else ('', full_name)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@parser_classes([MultiPartParser, FormParser])
+def import_classwork_scores(request):
+    uploaded_file = request.FILES.get('file')
+
+    if not uploaded_file:
+        return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        document = Document(uploaded_file)
+        table = document.tables[0]
+
+        updated = 0
+        not_found = []
+
+        for row in table.rows[1:]:  # Skip header row
+            matric_number = row.cells[0].text.strip()
+            score_text = row.cells[1].text.strip()
+
+            try:
+                score = float(score_text)
+            except ValueError:
+                continue  # Skip invalid score rows
+
+            try:
+                student = Student.objects.get(matric_number=matric_number)
+                student.classwork = score
+                student.save()
+                updated += 1
+            except Student.DoesNotExist:
+                not_found.append(matric_number)
+
+        return Response({
+            "message": "Classwork scores import completed.",
+            "updated": updated,
+            "not_found": not_found
+        })
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@parser_classes([MultiPartParser, FormParser])
+def import_practical_scores(request):
+    uploaded_file = request.FILES.get('file')
+
+    if not uploaded_file:
+        return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        document = Document(uploaded_file)
+        table = document.tables[0]
+
+        updated = 0
+        not_found = []
+
+        for row in table.rows[1:]:  # Skip header row
+            matric_number = row.cells[0].text.strip()
+            score_text = row.cells[1].text.strip()
+
+            try:
+                score = float(score_text)
+            except ValueError:
+                continue  # Skip rows with invalid scores
+
+            try:
+                student = Student.objects.get(matric_number=matric_number)
+                student.practical = score
+                student.save()
+                updated += 1
+            except Student.DoesNotExist:
+                not_found.append(matric_number)
+
+        return Response({
+            "message": "Practical scores import completed.",
+            "updated": updated,
+            "not_found": not_found
+        })
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@parser_classes([MultiPartParser, FormParser])
+def import_cbt_scores(request):
+    uploaded_file = request.FILES.get('file')
+
+    if not uploaded_file:
+        return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        document = Document(uploaded_file)
+        table = document.tables[0]
+
+        updated = 0
+        not_found = []
+        invalid_scores = []
+
+        for row in table.rows[1:]:  # Skip header
+            matric_number = row.cells[0].text.strip()
+            score_text = row.cells[1].text.strip()
+
+            try:
+                score = float(score_text)
+            except ValueError:
+                invalid_scores.append(matric_number)
+                continue
+
+            try:
+                student = Student.objects.get(matric_number=matric_number)
+                ca_obj, created = CA.objects.get_or_create(student=student)
+                ca_obj.CBT = score
+                ca_obj.save()
+                updated += 1
+            except Student.DoesNotExist:
+                not_found.append(matric_number)
+
+        return Response({
+            "message": "CBT scores import completed.",
+            "updated": updated,
+            "not_found": not_found,
+            "invalid_scores": invalid_scores,
+        })
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -329,7 +329,7 @@ def import_classwork_scores(request):
                 continue  # Skip invalid score rows
 
             try:
-                student = Student.objects.get(matric_number=matric_number)
+                student = Student.objects.get(matric_number__iexact=matric_number)
                 student.classwork = score
                 student.save()
                 updated += 1
@@ -373,7 +373,7 @@ def import_practical_scores(request):
                 continue  # Skip rows with invalid scores
 
             try:
-                student = Student.objects.get(matric_number=matric_number)
+                student = Student.objects.get(matric_number__iexact=matric_number)
                 student.practical = score
                 student.save()
                 updated += 1
@@ -419,7 +419,7 @@ def import_cbt_scores(request):
                 continue
 
             try:
-                student = Student.objects.get(matric_number=matric_number)
+                student = Student.objects.get(matric_number__iexact=matric_number)
                 ca_obj, created = CA.objects.get_or_create(student=student)
                 ca_obj.CBT = score
                 ca_obj.save()

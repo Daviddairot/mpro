@@ -1,6 +1,6 @@
 # musicapp/views.py
 from django.http import HttpResponse
-
+from openpyxl import load_workbook
 from mapp.utils import get_tokens_for_user
 from .models import Grade, Student, Assessment
 from .forms import AssessmentForm
@@ -303,36 +303,36 @@ def parse_name(full_name):
     return (parts[0], parts[1]) if len(parts) == 2 else ('', full_name)
 
 
+# Utility to read Excel rows
+def parse_excel(uploaded_file):
+    workbook = load_workbook(uploaded_file)
+    sheet = workbook.active
+    rows = list(sheet.iter_rows(values_only=True))
+    return rows[1:]  # Skip header
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
 def import_classwork_scores(request):
     uploaded_file = request.FILES.get('file')
-
     if not uploaded_file:
         return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        document = Document(uploaded_file)
-        table = document.tables[0]
-
+        rows = parse_excel(uploaded_file)
         updated = 0
         not_found = []
 
-        for row in table.rows[1:]:  # Skip header row
-            matric_number = row.cells[0].text.strip()
-            score_text = row.cells[1].text.strip()
-
+        for row in rows:
+            matric_number, score_text = str(row[0]).strip(), row[1]
             try:
                 score = float(score_text)
-            except ValueError:
-                continue  # Skip invalid score rows
-
-            try:
                 student = Student.objects.get(matric_number__iexact=matric_number)
                 student.classwork = score
                 student.save()
                 updated += 1
+            except (ValueError, TypeError):
+                continue
             except Student.DoesNotExist:
                 not_found.append(matric_number)
 
@@ -344,39 +344,31 @@ def import_classwork_scores(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
 def import_practical_scores(request):
     uploaded_file = request.FILES.get('file')
-
     if not uploaded_file:
         return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        document = Document(uploaded_file)
-        table = document.tables[0]
-
+        rows = parse_excel(uploaded_file)
         updated = 0
         not_found = []
 
-        for row in table.rows[1:]:  # Skip header row
-            matric_number = row.cells[0].text.strip()
-            score_text = row.cells[1].text.strip()
-
+        for row in rows:
+            matric_number, score_text = str(row[0]).strip(), row[1]
             try:
                 score = float(score_text)
-            except ValueError:
-                continue  # Skip rows with invalid scores
-
-            try:
                 student = Student.objects.get(matric_number__iexact=matric_number)
                 student.practical = score
                 student.save()
                 updated += 1
+            except (ValueError, TypeError):
+                continue
             except Student.DoesNotExist:
                 not_found.append(matric_number)
 
@@ -388,39 +380,33 @@ def import_practical_scores(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    
-    
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
 def import_cbt_scores(request):
     uploaded_file = request.FILES.get('file')
-
     if not uploaded_file:
         return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        document = Document(uploaded_file)
-        table = document.tables[0]
-
+        rows = parse_excel(uploaded_file)
         updated = 0
         not_found = []
         invalid_scores = []
 
-        for row in table.rows[1:]:  # Skip header
-            matric_number = row.cells[0].text.strip()
-            score_text = row.cells[1].text.strip()
-
+        for row in rows:
+            matric_number, score_text = str(row[0]).strip(), row[1]
             try:
                 score = float(score_text)
-            except ValueError:
+            except (ValueError, TypeError):
                 invalid_scores.append(matric_number)
                 continue
 
             try:
                 student = Student.objects.get(matric_number__iexact=matric_number)
-                ca_obj, created = CA.objects.get_or_create(student=student)
+                ca_obj, _ = CA.objects.get_or_create(student=student)
                 ca_obj.CBT = score
                 ca_obj.save()
                 updated += 1

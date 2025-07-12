@@ -39,13 +39,13 @@ class CA(models.Model):
     assessor = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     CBT = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
     practical = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
-    AH = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
+    classwork = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
     Assignment = models.DecimalField(decimal_places=2, max_digits=5, default=0.00)
     total = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
 
 
     def save(self, *args, **kwargs):
-        self.total = Decimal(self.CBT) + Decimal(self.practical) + Decimal(self.AH) + Decimal(self.Assignment)
+        self.total = Decimal(self.CBT) + Decimal(self.practical) + Decimal(self.classwork) + Decimal(self.Assignment)
         super().save(*args, **kwargs)
         Grade.update_or_create_for_student(self.student)
 

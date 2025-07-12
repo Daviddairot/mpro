@@ -76,7 +76,7 @@ def ca(request):
     student_id = request.data.get('student')  # Assuming student is passed as an ID
     CBT = request.data.get('CBT')
     practical = request.data.get('practical')
-    AH = request.data.get('AH')
+    classwork = request.data.get('classwork')
     Assignments = request.data.get('Assignments')
     print(student_id)
     # Get Assessor (User)
@@ -100,8 +100,8 @@ def ca(request):
         ca.CBT = CBT
     if practical is not None:
         ca.practical = practical
-    if AH is not None:
-        ca.AH = AH
+    if classwork is not None:
+        ca.classwork = classwork
     if Assignments is not None:
         ca.Assignment = Assignments  # Make sure field name matches your model
 
@@ -124,7 +124,7 @@ def getCA(request, id):
             'instrument': student.student.instrument or "NULL",
             "CBT": student.CBT,
             "practical": student.practical,
-            "AH": student.AH,
+            "classwork": student.classwork,
             "Assignment": student.Assignment,
             "total": student.total
         }
@@ -325,11 +325,13 @@ def import_classwork_scores(request):
 
         for row in rows:
             matric_number, score_text = str(row[0]).strip(), row[1]
+            print(matric_number, score_text)
             try:
-                score = float(score_text)
                 student = Student.objects.get(matric_number__iexact=matric_number)
-                student.classwork = score
-                student.save()
+                ca_obj, _ = CA.objects.get_or_create(student=student)
+                score = float(score_text)
+                ca_obj.classwork = float(score_text)
+                ca_obj.save()
                 updated += 1
             except (ValueError, TypeError):
                 continue
@@ -362,10 +364,11 @@ def import_practical_scores(request):
         for row in rows:
             matric_number, score_text = str(row[0]).strip(), row[1]
             try:
-                score = float(score_text)
                 student = Student.objects.get(matric_number__iexact=matric_number)
-                student.practical = score
-                student.save()
+                ca_obj, _ = CA.objects.get_or_create(student=student)
+                score = float(score_text)
+                ca_obj.practical = score
+                ca_obj.save()
                 updated += 1
             except (ValueError, TypeError):
                 continue

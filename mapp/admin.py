@@ -10,7 +10,7 @@ class AssessmentAdmin(admin.ModelAdmin):
     search_fields = ('student__matric_number', 'student__first_name', 'student__last_name')
 
 class CAAdmin(admin.ModelAdmin):
-    list_display = ('student', 'CBT', 'practical', 'AH', 'Assignment', 'total', 'assessor')
+    list_display = ('student', 'CBT', 'practical', 'classwork', 'Assignment', 'total', 'assessor')
     search_fields = ('student__matric_number', 'student__first_name', 'student__last_name')
 
 @admin.register(Grade)

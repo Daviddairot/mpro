@@ -386,6 +386,7 @@ def import_practical_scores(request):
 
 
 @api_view(['POST'])
+@csrf_exempt
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
 def import_cbt_scores(request):

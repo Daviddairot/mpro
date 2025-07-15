@@ -315,9 +315,9 @@ def parse_excel(uploaded_file):
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
 def import_classwork_scores(request):
-    uploaded_file = request.FILES.get('file')
+    uploaded_file = request.FILES.get("file")
     if not uploaded_file:
-        return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "No file uploaded."}, status=400)
 
     try:
         rows = parse_excel(uploaded_file)
@@ -335,11 +335,11 @@ def import_classwork_scores(request):
             except Student.DoesNotExist:
                 not_found.append(matric)
             except Exception as e:
-                print(f"Error for row {row}: {e}")
+                print("Row error:", e)
                 continue
 
         return Response({
-            "message": "CBT upload complete",
+            "message": "CBT import complete",
             "updated": updated,
             "not_found": not_found
         })

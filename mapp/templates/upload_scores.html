@@ -1,0 +1,46 @@
+<!-- templates/upload_scores.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upload Scores</title>
+  </head>
+  <body>
+    <h2>Upload Scores</h2>
+
+    <form id="uploadForm" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <label for="score_type">Select Score Type:</label>
+      <select id="score_type" name="score_type" required>
+        <option value="">-- Choose Score Type --</option>
+        <option value="{% url 'import-cbt' %}">CBT</option>
+        <option value="{% url 'import-practical' %}">Practical</option>
+        <option value="{% url 'import-classwork' %}">Classwork</option>
+      </select>
+
+      <br /><br />
+
+      <input type="file" name="file" required />
+
+      <br /><br />
+
+      <button type="submit">Upload</button>
+    </form>
+
+    <script>
+      const form = document.getElementById("uploadForm");
+      const select = document.getElementById("score_type");
+
+      form.addEventListener("submit", function (e) {
+        const actionUrl = select.value;
+        if (!actionUrl) {
+          e.preventDefault();
+          alert("Please select a score type.");
+        } else {
+          form.action = actionUrl;
+        }
+      });
+    </script>
+  </body>
+</html>

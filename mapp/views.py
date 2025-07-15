@@ -21,6 +21,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.views.decorators.csrf import csrf_exempt 
+import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -324,28 +325,27 @@ def import_classwork_scores(request):
         not_found = []
 
         for row in rows:
-            matric_number, score_text = str(row[0]).strip(), row[1]
-            print(matric_number, score_text)
             try:
-                student = Student.objects.get(matric_number__iexact=matric_number)
+                matric, score = str(row[0]).strip(), row[1]
+                student = Student.objects.get(matric_number__iexact=matric)
                 ca_obj, _ = CA.objects.get_or_create(student=student)
-                score = float(score_text)
-                ca_obj.classwork = float(score_text)
+                ca_obj.CBT = float(score)
                 ca_obj.save()
                 updated += 1
-            except (ValueError, TypeError):
-                continue
             except Student.DoesNotExist:
-                not_found.append(matric_number)
+                not_found.append(matric)
+            except Exception as e:
+                print(f"Error for row {row}: {e}")
+                continue
 
         return Response({
-            "message": "Classwork scores import completed.",
+            "message": "CBT upload complete",
             "updated": updated,
             "not_found": not_found
         })
-
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=500)
 
 
 @api_view(['POST'])

@@ -329,7 +329,7 @@ def import_classwork_scores(request):
                 matric, score = str(row[0]).strip(), row[1]
                 student = Student.objects.get(matric_number__iexact=matric)
                 ca_obj, _ = CA.objects.get_or_create(student=student)
-                ca_obj.CBT = float(score)
+                ca_obj.classwork = float(score)
                 ca_obj.save()
                 updated += 1
             except Student.DoesNotExist:

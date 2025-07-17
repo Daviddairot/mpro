@@ -186,7 +186,7 @@ def download_grades(request):
     # Header row
     headers = [
         'S/N', 'Student', 'Matric Number', 'Exam', 'CBT', 'Practical',
-        'Classwork', 'Assignment', 'Total CA', 'Extra', 'Total'
+        'Classwork', 'Assignment', 'Total CA', 'Total'
     ]
     ws.append(headers)
 
@@ -202,7 +202,7 @@ def download_grades(request):
             grade.ca.classwork,
             grade.ca.Assignment,
             grade.ca.total,
-            grade.extra,
+            # grade.extra,
             grade.total
         ])
 

@@ -22,6 +22,8 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.views.decorators.csrf import csrf_exempt 
 import traceback
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
 
 
 logger = logging.getLogger(__name__)
@@ -176,36 +178,44 @@ def grades_list(request):
 
 
 def download_grades(request):
-    # Create a Word document
-    doc = Document()
-    doc.add_heading('Grade List', 0)
 
-    # Add a table with columns: S/N, Student, Matric Number, Score, CA, Extra, Total
-    table = doc.add_table(rows=1, cols=7)
-    hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = 'S/N'
-    hdr_cells[1].text = 'Student'
-    hdr_cells[2].text = 'Matric Number'
-    hdr_cells[3].text = 'Score'
-    hdr_cells[4].text = 'CA'
-    hdr_cells[5].text = 'Extra'
-    hdr_cells[6].text = 'Total'
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Grades"
 
-    # Add data rows
+    # Header row
+    headers = [
+        'S/N', 'Student', 'Matric Number', 'Exam', 'CBT', 'Practical',
+        'Classwork', 'Assignment', 'Total CA', 'Extra', 'Total'
+    ]
+    ws.append(headers)
+
+    # Data rows
     for idx, grade in enumerate(Grade.objects.all(), start=1):
-        row_cells = table.add_row().cells
-        row_cells[0].text = str(idx)
-        row_cells[1].text = f"{grade.student.first_name} {grade.student.last_name}"
-        row_cells[2].text = grade.student.matric_number
-        row_cells[3].text = str(grade.score)
-        row_cells[4].text = str(grade.ca)
-        row_cells[5].text = str(grade.extra)
-        row_cells[6].text = str(grade.total)
+        ws.append([
+            idx,
+            f"{grade.student.first_name} {grade.student.last_name}",
+            grade.student.matric_number,
+            grade.score,
+            grade.ca.CBT,
+            grade.ca.practical,
+            grade.ca.classwork,
+            grade.ca.Assignment,
+            grade.ca.total,
+            grade.extra,
+            grade.total
+        ])
 
-    # Create a response with the document
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = 'attachment; filename=grades.docx'
-    doc.save(response)
+    # Optional: set column widths
+    for i, header in enumerate(headers, 1):
+        ws.column_dimensions[get_column_letter(i)].width = max(10, len(header) + 2)
+
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=grades.xlsx'
+    wb.save(response)
     return response
 
 

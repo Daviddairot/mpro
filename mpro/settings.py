@@ -147,6 +147,10 @@ DATABASES = {
         'PASSWORD': 'Eu190304-1993',
         'HOST': 'aws-0-eu-central-1.pooler.supabase.com',
         'PORT': '6543',
+        "CONN_MAX_AGE": 0,   # force reconnect each request
+        "OPTIONS": {
+            "sslmode": "require",  # if your provider enforces SSL
+        },
     }
 }
  

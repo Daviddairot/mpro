@@ -15,10 +15,11 @@ urlpatterns = [
     path('getUser', views.getUser, name='getUser'),
     path('grade', views.grade, name='grades_list'),
     path('grades/', views.grades_list, name='grades_list'),
-    path('import-student', views.import_students_from_docx, name = 'import_students_from_docx'),
+    path('import-student', views.import_students_from_excel, name = 'import_students_from_excel'),
     path('import-classwork', views.import_classwork_scores, name ='import-classwork'),
     path('import-CBT', views.import_cbt_scores, name ='import-cbt'),
     path('import-practical', views.import_practical_scores, name='import-practical'),
     path('download-grades/', views.download_grades, name='download_grades'),
+    path('download-my-assessments/', views.download_my_assessments, name='download_my_assessments'),
     path("upload-scores/", TemplateView.as_view(template_name="upload_scores.html"), name="upload-scores"),
 ]

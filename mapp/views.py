@@ -11,7 +11,6 @@ from django.contrib.auth.decorators import login_required
 from .models import Student, Assessment, CA
 from .forms import AssessmentForm, StudentSearchForm
 import logging
-from docx import Document
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -221,6 +220,49 @@ def download_grades(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def download_my_assessments(request):
+    user = request.user
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "My Assessments"
+
+    headers = [
+        'S/N', 'First Name', 'Last Name', 'Matric Number', 'Instrument', 
+        'Song 1', 'Song 2', 'Song 3', 'Dressing', 'Total'
+    ]
+    ws.append(headers)
+
+    assessments = Assessment.objects.filter(assessor=user).select_related('student')
+    
+    for idx, assessment in enumerate(assessments, start=1):
+        ws.append([
+            idx,
+            assessment.student.first_name,
+            assessment.student.last_name,
+            assessment.student.matric_number,
+            assessment.student.instrument,
+            float(assessment.song1),
+            float(assessment.song2),
+            float(assessment.song3),
+            float(assessment.dressing),
+            float(assessment.total)
+        ])
+
+    for i, header in enumerate(headers, 1):
+        ws.column_dimensions[get_column_letter(i)].width = max(10, len(header) + 2)
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"my_assessments_{user.username}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    wb.save(response)
+    return response
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def studentData(request):
     user = request.user
     assessor =  get_object_or_404(User, username=user)
@@ -268,30 +310,32 @@ def grade(request):
 @csrf_exempt
 @permission_classes([AllowAny])
 @parser_classes([MultiPartParser, FormParser])
-def import_students_from_docx(request):
+def import_students_from_excel(request):
     uploaded_file = request.FILES.get('file')
 
     if not uploaded_file:
         return Response({"error": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        document = Document(uploaded_file)
-        table = document.tables[0]
+        rows = parse_excel(uploaded_file)
         created_count = 0
         updated_count = 0
 
-        for row in table.rows[1:]:  # Skip header
-            matric_number = row.cells[0].text.strip()
-            full_name = row.cells[1].text.strip()
-            instrument = row.cells[2].text.strip()
-
-            surname, first_name = parse_name(full_name)
+        for row in rows:
+            # Check boundaries just in case
+            if not row or not row[0]:
+                continue
+                
+            matric_number = str(row[0]).strip()
+            first_name = str(row[1]).strip() if len(row) > 1 and row[1] else ""
+            last_name = str(row[2]).strip() if len(row) > 2 and row[2] else ""
+            instrument = str(row[3]).strip() if len(row) > 3 and row[3] else ""
 
             student, created = Student.objects.update_or_create(
                 matric_number=matric_number,
                 defaults={
                     'first_name': first_name,
-                    'last_name': surname,
+                    'last_name': last_name,
                     'instrument': instrument
                 }
             )
@@ -301,7 +345,7 @@ def import_students_from_docx(request):
                 updated_count += 1
 
         return Response({
-            "message": "Import completed successfully.",
+            "message": "Student import completed successfully.",
             "created": created_count,
             "updated": updated_count
         })

@@ -1,5 +1,45 @@
 from django.contrib import admin
+from django.http import HttpResponse
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
 from .models import Grade, Student, Assessment, CA
+
+@admin.action(description='Export selected assessments to Excel')
+def export_assessments_to_excel(modeladmin, request, queryset):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Assessments"
+
+    headers = [
+        'S/N', 'Assessor', 'First Name', 'Last Name', 'Matric Number', 'Instrument', 
+        'Song 1', 'Song 2', 'Song 3', 'Dressing', 'Total'
+    ]
+    ws.append(headers)
+
+    for idx, assessment in enumerate(queryset.select_related('student', 'assessor'), start=1):
+        ws.append([
+            idx,
+            assessment.assessor.username if assessment.assessor else "N/A",
+            assessment.student.first_name,
+            assessment.student.last_name,
+            assessment.student.matric_number,
+            assessment.student.instrument,
+            float(assessment.song1),
+            float(assessment.song2),
+            float(assessment.song3),
+            float(assessment.dressing),
+            float(assessment.total)
+        ])
+
+    for i, header in enumerate(headers, 1):
+        ws.column_dimensions[get_column_letter(i)].width = max(10, len(header) + 2)
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="assessments_export.xlsx"'
+    wb.save(response)
+    return response
 
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'matric_number', 'instrument')
@@ -8,6 +48,8 @@ class StudentAdmin(admin.ModelAdmin):
 class AssessmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'song1', 'song2', 'song3', 'dressing', 'assessor', 'total')
     search_fields = ('student__matric_number', 'student__first_name', 'student__last_name')
+    list_filter = ('assessor',)
+    actions = [export_assessments_to_excel]
 
 class CAAdmin(admin.ModelAdmin):
     list_display = ('student', 'CBT', 'practical', 'classwork', 'Assignment', 'total', 'assessor')

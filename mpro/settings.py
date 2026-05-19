@@ -139,13 +139,14 @@ WSGI_APPLICATION = 'mpro.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+#Db from david.dairo@elizadeuniversity.edu.ng
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'USER': 'postgres.guyzwkbjkvacgjasmmox',
+        'USER': 'postgres.rwvunnkgejxaousczuwv',
         'PASSWORD': 'Eu190304-1993',
-        'HOST': 'aws-0-eu-central-1.pooler.supabase.com',
+        'HOST': 'aws-1-eu-central-2.pooler.supabase.com',
         'PORT': '6543',
         "CONN_MAX_AGE": 0,   # <— Important for Vercel / serverless
         "OPTIONS": {

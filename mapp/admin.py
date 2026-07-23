@@ -1,8 +1,9 @@
 from django.contrib import admin
+from django.contrib import messages
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-from .models import Grade, Student, Assessment, CA
+from .models import Grade, Student, Assessment, CA, DeletedStudent
 
 admin.site.site_header = "Musicology Admin"
 admin.site.site_title = "Musicology Admin"
@@ -15,7 +16,7 @@ def export_assessments_to_excel(modeladmin, request, queryset):
     ws.title = "Assessments"
 
     headers = [
-        'S/N', 'Assessor', 'First Name', 'Last Name', 'Matric Number', 'Instrument', 
+        'S/N', 'Assessor', 'First Name', 'Last Name', 'Matric Number', 'Instrument',
         'Song 1', 'Song 2', 'Song 3', 'Dressing', 'Total'
     ]
     ws.append(headers)
@@ -51,7 +52,10 @@ def export_grades_to_excel(modeladmin, request, queryset):
     ws = wb.active
     ws.title = "Grades"
 
-    headers = ['S/N', 'Student', 'Matric Number', 'CA', 'Exam', 'Total']
+    headers = [
+        'S/N', 'Student', 'Matric Number', 'CBT', 'Practical', 'Classwork',
+        'Assignment', 'Total CA', 'Exam', 'Total'
+    ]
     ws.append(headers)
 
     for idx, grade in enumerate(queryset.select_related('student', 'ca'), start=1):
@@ -59,6 +63,10 @@ def export_grades_to_excel(modeladmin, request, queryset):
             idx,
             f"{grade.student.first_name} {grade.student.last_name}",
             grade.student.matric_number,
+            float(grade.ca.CBT) if grade.ca else 0,
+            float(grade.ca.practical) if grade.ca else 0,
+            float(grade.ca.classwork) if grade.ca else 0,
+            float(grade.ca.Assignment) if grade.ca else 0,
             float(grade.ca.total) if grade.ca else 0,
             float(grade.score),
             float(grade.total)
@@ -75,22 +83,34 @@ def export_grades_to_excel(modeladmin, request, queryset):
     return response
 
 
-class StudentAdmin(admin.ModelAdmin):
+class SoftDeleteAdminMixin:
+    """
+    Deleting from the admin (single object or 'Delete selected') sends rows to the
+    recycle bin instead of removing them, since Django's bulk queryset.delete()
+    normally bypasses each model's overridden delete(). Single-object deletes
+    already go through delete_model() -> obj.delete(), which is soft by default.
+    """
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
+
+
+class StudentAdmin(SoftDeleteAdminMixin, admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'matric_number', 'instrument')
     search_fields = ('first_name', 'last_name', 'matric_number', 'instrument')
 
-class AssessmentAdmin(admin.ModelAdmin):
+class AssessmentAdmin(SoftDeleteAdminMixin, admin.ModelAdmin):
     list_display = ('student', 'song1', 'song2', 'song3', 'dressing', 'assessor', 'total')
     search_fields = ('student__matric_number', 'student__first_name', 'student__last_name')
     list_filter = ('assessor',)
     actions = [export_assessments_to_excel]
 
-class CAAdmin(admin.ModelAdmin):
+class CAAdmin(SoftDeleteAdminMixin, admin.ModelAdmin):
     list_display = ('student', 'CBT', 'practical', 'classwork', 'Assignment', 'total', 'assessor')
     search_fields = ('student__matric_number', 'student__first_name', 'student__last_name')
 
 @admin.register(Grade)
-class GradeAdmin(admin.ModelAdmin):
+class GradeAdmin(SoftDeleteAdminMixin, admin.ModelAdmin):
     list_display = ('student', 'score', 'ca', 'extra', 'total')
     search_fields = ('student__first_name', 'student__last_name', 'student__matric_number')
     list_filter = ('student__instrument',)
@@ -101,3 +121,41 @@ class GradeAdmin(admin.ModelAdmin):
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Assessment, AssessmentAdmin)
 admin.site.register(CA, CAAdmin)
+
+
+@admin.action(description='Restore selected students')
+def restore_students(modeladmin, request, queryset):
+    count = queryset.count()
+    for student in queryset:
+        student.restore()
+    modeladmin.message_user(request, f"Restored {count} student(s).", messages.SUCCESS)
+
+
+@admin.action(description='Permanently delete selected students (cannot be undone)')
+def hard_delete_students(modeladmin, request, queryset):
+    count = queryset.count()
+    for student in queryset:
+        student.hard_delete()
+    modeladmin.message_user(request, f"Permanently deleted {count} student(s).", messages.WARNING)
+
+
+@admin.register(DeletedStudent)
+class DeletedStudentAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'matric_number', 'instrument', 'deleted_at')
+    search_fields = ('first_name', 'last_name', 'matric_number', 'instrument')
+    ordering = ('-deleted_at',)
+    actions = [restore_students, hard_delete_students]
+
+    def get_queryset(self, request):
+        return Student.all_objects.filter(is_deleted=True)
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop('delete_selected', None)
+        return actions
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

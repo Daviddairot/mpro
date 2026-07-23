@@ -90,12 +90,15 @@ def ca(request):
     # Get Student
     student = get_object_or_404(Student, id=student_id)
     print(student)
-    # Get or create CA record
-    ca, created = CA.objects.get_or_create(student=student)
+    # Get or create CA record. Use all_objects: a soft-deleted CA still occupies
+    # the unique `student` slot, so this must see it instead of trying to insert a duplicate.
+    ca, created = CA.all_objects.get_or_create(student=student)
+    if ca.is_deleted:
+        ca.restore()
     print(ca)
     # Assign assessor
     ca.assessor = assessor
-    
+
 
     # Update only if a value is provided
     if CBT is not None:
@@ -116,7 +119,7 @@ def ca(request):
 def getCA(request, id):
     user = request.user
     stud = get_object_or_404(Student, id=id)
-    student, created = CA.objects.get_or_create(student=stud)
+    student, created = CA.all_objects.get_or_create(student=stud)
     studentData = [
         {
             # 'id': student.id,
@@ -331,7 +334,9 @@ def import_students_from_excel(request):
             last_name = str(row[2]).strip() if len(row) > 2 and row[2] else ""
             instrument = str(row[3]).strip() if len(row) > 3 and row[3] else ""
 
-            student, created = Student.objects.update_or_create(
+            # Use all_objects: a soft-deleted student still occupies the unique
+            # matric_number slot, and re-importing them here should restore them.
+            student, created = Student.all_objects.update_or_create(
                 matric_number=matric_number,
                 defaults={
                     'first_name': first_name,
@@ -339,6 +344,8 @@ def import_students_from_excel(request):
                     'instrument': instrument
                 }
             )
+            if student.is_deleted:
+                student.restore()
             if created:
                 created_count += 1
             else:
@@ -382,7 +389,9 @@ def import_classwork_scores(request):
             try:
                 matric, score = str(row[0]).strip(), row[1]
                 student = Student.objects.get(matric_number__iexact=matric)
-                ca_obj, _ = CA.objects.get_or_create(student=student)
+                ca_obj, _ = CA.all_objects.get_or_create(student=student)
+                if ca_obj.is_deleted:
+                    ca_obj.restore()
                 ca_obj.classwork = float(score)
                 ca_obj.save()
                 updated += 1
@@ -419,7 +428,9 @@ def import_practical_scores(request):
             matric_number, score_text = str(row[0]).strip(), row[1]
             try:
                 student = Student.objects.get(matric_number__iexact=matric_number)
-                ca_obj, _ = CA.objects.get_or_create(student=student)
+                ca_obj, _ = CA.all_objects.get_or_create(student=student)
+                if ca_obj.is_deleted:
+                    ca_obj.restore()
                 score = float(score_text)
                 ca_obj.practical = score
                 ca_obj.save()
@@ -464,7 +475,9 @@ def import_cbt_scores(request):
 
             try:
                 student = Student.objects.get(matric_number__iexact=matric_number)
-                ca_obj, _ = CA.objects.get_or_create(student=student)
+                ca_obj, _ = CA.all_objects.get_or_create(student=student)
+                if ca_obj.is_deleted:
+                    ca_obj.restore()
                 ca_obj.CBT = score
                 ca_obj.save()
                 updated += 1

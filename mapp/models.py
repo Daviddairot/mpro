@@ -163,3 +163,30 @@ class DeletedStudent(Student):
         proxy = True
         verbose_name = "Deleted Student"
         verbose_name_plural = "Deleted Students (Recycle Bin)"
+
+
+class DeletedAssessment(Assessment):
+    """Proxy model powering the 'Deleted Assessments' recycle bin in the admin."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "Deleted Assessment"
+        verbose_name_plural = "Deleted Assessments (Recycle Bin)"
+
+
+class DeletedCA(CA):
+    """Proxy model powering the 'Deleted CA' recycle bin in the admin."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "Deleted CA"
+        verbose_name_plural = "Deleted CA Records (Recycle Bin)"
+
+
+class DeletedGrade(Grade):
+    """Proxy model powering the 'Deleted Grades' recycle bin in the admin."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "Deleted Grade"
+        verbose_name_plural = "Deleted Grades (Recycle Bin)"

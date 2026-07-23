@@ -3,7 +3,10 @@ from django.contrib import messages
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-from .models import Grade, Student, Assessment, CA, DeletedStudent
+from .models import (
+    Grade, Student, Assessment, CA,
+    DeletedStudent, DeletedAssessment, DeletedCA, DeletedGrade,
+)
 
 admin.site.site_header = "Musicology Admin"
 admin.site.site_title = "Musicology Admin"
@@ -123,31 +126,34 @@ admin.site.register(Assessment, AssessmentAdmin)
 admin.site.register(CA, CAAdmin)
 
 
-@admin.action(description='Restore selected students')
-def restore_students(modeladmin, request, queryset):
+@admin.action(description='Restore selected')
+def restore_selected(modeladmin, request, queryset):
     count = queryset.count()
-    for student in queryset:
-        student.restore()
-    modeladmin.message_user(request, f"Restored {count} student(s).", messages.SUCCESS)
+    for obj in queryset:
+        obj.restore()
+    modeladmin.message_user(request, f"Restored {count} record(s).", messages.SUCCESS)
 
 
-@admin.action(description='Permanently delete selected students (cannot be undone)')
-def hard_delete_students(modeladmin, request, queryset):
+@admin.action(description='Permanently delete selected (cannot be undone)')
+def hard_delete_selected(modeladmin, request, queryset):
     count = queryset.count()
-    for student in queryset:
-        student.hard_delete()
-    modeladmin.message_user(request, f"Permanently deleted {count} student(s).", messages.WARNING)
+    for obj in queryset:
+        obj.hard_delete()
+    modeladmin.message_user(request, f"Permanently deleted {count} record(s).", messages.WARNING)
 
 
-@admin.register(DeletedStudent)
-class DeletedStudentAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name', 'matric_number', 'instrument', 'deleted_at')
-    search_fields = ('first_name', 'last_name', 'matric_number', 'instrument')
+class RecycleBinAdminMixin:
+    """
+    Shared behaviour for the 'Deleted ...' proxy admins: list only soft-deleted
+    rows, offer restore/permanent-delete, and hide add/normal-delete since this
+    page is a bin, not a place to create or hard-delete records by accident.
+    """
+    source_model = None  # the concrete (non-proxy) model, set on each subclass
+    actions = [restore_selected, hard_delete_selected]
     ordering = ('-deleted_at',)
-    actions = [restore_students, hard_delete_students]
 
     def get_queryset(self, request):
-        return Student.all_objects.filter(is_deleted=True)
+        return self.source_model.all_objects.filter(is_deleted=True)
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -159,3 +165,31 @@ class DeletedStudentAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(DeletedStudent)
+class DeletedStudentAdmin(RecycleBinAdminMixin, admin.ModelAdmin):
+    source_model = Student
+    list_display = ('first_name', 'last_name', 'matric_number', 'instrument', 'deleted_at')
+    search_fields = ('first_name', 'last_name', 'matric_number', 'instrument')
+
+
+@admin.register(DeletedAssessment)
+class DeletedAssessmentAdmin(RecycleBinAdminMixin, admin.ModelAdmin):
+    source_model = Assessment
+    list_display = ('student', 'song1', 'song2', 'song3', 'dressing', 'total', 'assessor', 'deleted_at')
+    search_fields = ('student__matric_number', 'student__first_name', 'student__last_name')
+
+
+@admin.register(DeletedCA)
+class DeletedCAAdmin(RecycleBinAdminMixin, admin.ModelAdmin):
+    source_model = CA
+    list_display = ('student', 'CBT', 'practical', 'classwork', 'Assignment', 'total', 'deleted_at')
+    search_fields = ('student__matric_number', 'student__first_name', 'student__last_name')
+
+
+@admin.register(DeletedGrade)
+class DeletedGradeAdmin(RecycleBinAdminMixin, admin.ModelAdmin):
+    source_model = Grade
+    list_display = ('student', 'score', 'ca', 'extra', 'total', 'deleted_at')
+    search_fields = ('student__first_name', 'student__last_name', 'student__matric_number')
